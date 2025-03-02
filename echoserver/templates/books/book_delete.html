@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удалить книгу</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn-confirm {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-confirm:hover {
+            background-color: #c82333;
+        }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Удалить книгу</h1>
+        <p>Вы уверены, что хотите удалить книгу <strong>"{{ book.title }}"</strong> автора <strong>{{ book.author }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-confirm">Удалить</button>
+            <a href="{% url 'book_list' %}" class="btn btn-cancel">Отмена</a>
+        </form>
+    </div>
+</body>
+</html>
