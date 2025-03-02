@@ -129,7 +129,7 @@
             {% for book in page_obj %}
                 <li>
                     <div class="book-info">
-                        {{ book.title }} ({{ book.author }})
+                        {{ book.title }} ({{ book.author }}, {{ book.cost }} рублей)
                     </div>
                     <div class="book-actions">
                         <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>

@@ -10,7 +10,7 @@ from django.db import models
 class Book(models.Model):
     title = models.CharField(max_length=500)
     author = models.CharField(max_length=500)
-    cost = models.FloatField()
+    cost = models.IntegerField()
 
     class Meta:
         managed = False
