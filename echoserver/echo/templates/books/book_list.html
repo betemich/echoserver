@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -129,7 +131,7 @@
             {% for book in page_obj %}
                 <li>
                     <div class="book-info">
-                        {{ book.title }} ({{ book.author }}, {{ book.cost }} рублей)
+                        {{ book.title }} ({{ book.author }}, {{ book.cost }} {{ book.cost|ruble }})
                     </div>
                     <div class="book-actions">
                         <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>
