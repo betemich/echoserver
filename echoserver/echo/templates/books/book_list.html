@@ -14,6 +14,56 @@
             padding: 0;
         }
 
+        .header {
+            width: 80%;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-links .register-link {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .auth-links .register-link:hover {
+            background-color: #218838;
+        }
+
+        .auth-links .login-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .auth-links .login-link:hover {
+            background-color: #0056b3;
+        }
+
         .container {
             width: 80%;
             margin: 0 auto;
@@ -124,6 +174,13 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>Электронная библиотека</h1>
+        <div class="auth-links">
+            <a href="{% url 'registration' %}" class="register-link">Зарегистрироваться</a>
+            <a href="{% url 'login' %}" class="login-link">Войти</a>
+        </div>
+    </div>
     <div class="container">
         <h1>Каталог книг</h1>
         <a href="{% url 'book_create' %}" class="add-book-link">Добавить новую книгу</a>
@@ -144,7 +201,7 @@
         <div class="pagination">
             <span class="step-links">
                 {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; первая</a>
+                    <a href="?page=1">« первая</a>
                     <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
                 {% endif %}
 
@@ -154,7 +211,7 @@
 
                 {% if page_obj.has_next %}
                     <a href="?page={{ page_obj.next_page_number }}">следующая</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">последняя »</a>
                 {% endif %}
             </span>
         </div>

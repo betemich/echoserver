@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .models import Book
 from .forms import BookForm
+from .forms import UserForm
 
 def book_list(request):
     books = Book.objects.all().order_by('title')
@@ -38,3 +39,20 @@ def book_delete(request, pk):
         book.delete()
         return redirect('book_list')
     return render(request, 'books/book_delete.html', {'book': book})
+
+def registration(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')
+        else:
+            print("Form is not valid")
+            return redirect('book_list')
+    else:
+        form = UserForm()
+    return render(request, 'books/registration.html', {'form': form})
+
+def login(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)

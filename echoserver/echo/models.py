@@ -18,3 +18,17 @@ class Book(models.Model):
     
     def __str__(self):
         return self.title
+
+class User(models.Model):
+    login = models.CharField(max_length=100)
+    passw = models.CharField(max_length=100)
+    mail = models.CharField(max_length=100)
+    user_name = models.CharField(max_length=100)
+    user_role = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'users'
+
+    def __str__(self):
+        return self.login
