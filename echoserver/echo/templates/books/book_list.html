@@ -7,13 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог книг</title>
     <style>
+        /* Стили из вашего текущего кода */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
         }
-
         .header {
             width: 80%;
             margin: 0 auto;
@@ -26,18 +26,15 @@
             border-radius: 8px;
             margin-top: 10px;
         }
-
         .header h1 {
             margin: 0;
             font-size: 1.5em;
             color: #333;
         }
-
         .auth-links {
             display: flex;
             gap: 10px;
         }
-
         .auth-links a {
             padding: 8px 16px;
             text-decoration: none;
@@ -45,25 +42,20 @@
             font-size: 14px;
             transition: background-color 0.3s ease;
         }
-
         .auth-links .register-link {
             background-color: #28a745;
             color: #fff;
         }
-
         .auth-links .register-link:hover {
             background-color: #218838;
         }
-
         .auth-links .login-link {
             background-color: #007bff;
             color: #fff;
         }
-
         .auth-links .login-link:hover {
             background-color: #0056b3;
         }
-
         .container {
             width: 80%;
             margin: 0 auto;
@@ -73,82 +65,28 @@
             border-radius: 8px;
             margin-top: 20px;
         }
-
         h1 {
             text-align: center;
             color: #333;
         }
-
-        .add-book-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .add-book-link:hover {
-            background-color: #218838;
-        }
-
         .book-list {
             list-style-type: none;
             padding: 0;
         }
-
         .book-list li {
             background-color: #f9f9f9;
             margin-bottom: 10px;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-
         .book-list li:hover {
             background-color: #f1f1f1;
         }
-
-        .book-info {
-            flex-grow: 1;
-        }
-
-        .book-actions a {
-            margin-left: 10px;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 3px;
-            font-size: 14px;
-        }
-
-        .book-actions .edit-link {
-            background-color: #ffc107;
-            color: #000;
-        }
-
-        .book-actions .edit-link:hover {
-            background-color: #e0a800;
-        }
-
-        .book-actions .delete-link {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .book-actions .delete-link:hover {
-            background-color: #c82333;
-        }
-
         .pagination {
             text-align: center;
             margin-top: 20px;
         }
-
         .pagination a {
             display: inline-block;
             padding: 8px 16px;
@@ -158,11 +96,9 @@
             text-decoration: none;
             border-radius: 5px;
         }
-
         .pagination a:hover {
             background-color: #0056b3;
         }
-
         .pagination .current {
             display: inline-block;
             padding: 8px 16px;
@@ -183,16 +119,11 @@
     </div>
     <div class="container">
         <h1>Каталог книг</h1>
-        <a href="{% url 'book_create' %}" class="add-book-link">Добавить новую книгу</a>
         <ul class="book-list">
             {% for book in page_obj %}
                 <li>
                     <div class="book-info">
                         {{ book.title }} ({{ book.author }}, {{ book.cost }} {{ book.cost|ruble }})
-                    </div>
-                    <div class="book-actions">
-                        <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>
-                        <a href="{% url 'book_delete' book.pk %}" class="delete-link">Удалить</a>
                     </div>
                 </li>
             {% endfor %}
