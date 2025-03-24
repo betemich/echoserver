@@ -77,11 +77,6 @@
             color: #dc3545;
             font-size: 14px;
             margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
         }
     </style>
 </head>
@@ -92,33 +87,72 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="login">Логин:</label>
-                <input type="text" id="login" name="login" required>
+                <input type="text" id="login" name="login" value="{{ form.login.value|default_if_none:'' }}" required>
+                {% if form.login.errors %}
+                    <div class="error-message">
+                        {% for error in form.login.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             <div class="form-group">
-                <label for="username">Имя пользователя:</label>
-                <input type="text" id="user_name" name="user_name" required>
+                <label for="user_name">Имя пользователя:</label>
+                <input type="text" id="user_name" name="user_name" value="{{ form.user_name.value|default_if_none:'' }}" required>
+                {% if form.user_name.errors %}
+                    <div class="error-message">
+                        {% for error in form.user_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="mail" name="mail" required>
+                <label for="mail">Email:</label>
+                <input type="email" id="mail" name="mail" value="{{ form.mail.value|default_if_none:'' }}" required>
+                {% if form.mail.errors %}
+                    <div class="error-message">
+                        {% for error in form.mail.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label for="password">Пароль:</label>
-                <input type="password" id="passw" name="passw" required>
+                <input type="password" id="password" name="password" required>
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label for="confirm-password">Подтверждение пароля:</label>
-                <input type="password" id="confirm-passw" name="confirm_passw" required>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+                {% if form.confirm_password.errors %}
+                    <div class="error-message">
+                        {% for error in form.confirm_password.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="form-group">
                 <button type="submit" class="btn">Зарегистрироваться</button>
                 <button type="button" onclick="window.location.href=this.getAttribute('data-url')" 
                     data-url="{% url 'book_list' %}" class="btn btn-cancel">Отмена</button>
             </div>
         </form>
-        <div class="error-message {% if error %}show{% endif %}" id="error-message">
-            {{ error }}
-        </div>
     </div>
 </body>
 </html>

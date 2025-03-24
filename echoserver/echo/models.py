@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 class Book(models.Model):
     title = models.CharField(max_length=500)
@@ -19,12 +20,19 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
-class User(models.Model):
-    login = models.CharField(max_length=100)
-    passw = models.CharField(max_length=100)
+class User(AbstractBaseUser, PermissionsMixin):
+    login = models.CharField(max_length=100, primary_key=True)
+    password = models.CharField(max_length=256)
     mail = models.CharField(max_length=100)
     user_name = models.CharField(max_length=100)
-    user_role = models.CharField(max_length=100)
+    user_role = models.CharField(max_length=100, default='user')
+    last_login = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'login'
+    REQUIRED_FIELDS = ['mail', 'user_name']
 
     class Meta:
         managed = False

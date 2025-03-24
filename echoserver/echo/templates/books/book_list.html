@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог книг</title>
     <style>
-        /* Стили из вашего текущего кода */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -69,6 +68,18 @@
             text-align: center;
             color: #333;
         }
+        .add-book-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .add-book-link:hover {
+            background-color: #218838;
+        }
         .book-list {
             list-style-type: none;
             padding: 0;
@@ -79,9 +90,31 @@
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .book-list li:hover {
             background-color: #f1f1f1;
+        }
+        .book-actions a {
+            margin-left: 10px;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .book-actions .edit-link {
+            background-color: #ffc107;
+        }
+        .book-actions .edit-link:hover {
+            background-color: #e0a800;
+        }
+        .book-actions .delete-link {
+            background-color: #dc3545;
+        }
+        .book-actions .delete-link:hover {
+            background-color: #c82333;
         }
         .pagination {
             text-align: center;
@@ -113,18 +146,33 @@
     <div class="header">
         <h1>Электронная библиотека</h1>
         <div class="auth-links">
-            <a href="{% url 'registration' %}" class="register-link">Зарегистрироваться</a>
-            <a href="{% url 'login' %}" class="login-link">Войти</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="login-link">Выйти</a>
+            {% else %}
+                <a href="{% url 'registration' %}" class="register-link">Зарегистрироваться</a>
+                <a href="{% url 'login' %}" class="login-link">Войти</a>
+            {% endif %}
         </div>
     </div>
     <div class="container">
         <h1>Каталог книг</h1>
+        
+        {% if user.is_authenticated %}
+            <a href="{% url 'book_create' %}" class="add-book-link">Добавить новую книгу</a>
+        {% endif %}
+
         <ul class="book-list">
             {% for book in page_obj %}
                 <li>
                     <div class="book-info">
                         {{ book.title }} ({{ book.author }}, {{ book.cost }} {{ book.cost|ruble }})
                     </div>
+                    {% if user.is_authenticated and user.user_role == "admin" %}
+                        <div class="book-actions">
+                            <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>
+                            <a href="{% url 'book_delete' book.pk %}" class="delete-link">Удалить</a>
+                        </div>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

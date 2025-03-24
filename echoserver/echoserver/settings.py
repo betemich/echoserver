@@ -104,6 +104,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'echo.auth_backend.CustomAuthBackend'
+]
+
+AUTH_USER_MODEL = 'echo.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
