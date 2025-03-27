@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя - Электронная библиотека</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            width: 80%;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .auth-links .login-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .auth-links .login-link:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .profile-info {
+            margin-top: 20px;
+        }
+        .profile-info p {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .edit-form, .password-form {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group input:focus {
+            border-color: #28a745;
+            outline: none;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .btn-edit:hover {
+            background-color: #e0a800;
+        }
+        .btn-change-password {
+            background-color: #17a2b8;
+            color: #fff;
+            margin-left: 10px;
+        }
+        .btn-change-password:hover {
+            background-color: #138496;
+        }
+        .btn-save {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background-color: #218838;
+        }
+        .btn-cancel {
+            background-color: #dc3545;
+            color: #fff;
+            margin-left: 10px;
+        }
+        .btn-cancel:hover {
+            background-color: #c82333;
+        }
+        .back-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Электронная библиотека</h1>
+        <div class="auth-links">
+            <a href="{% url 'logout' %}" class="login-link">Выйти</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Профиль пользователя</h1>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="profile-info">
+            {% if edit_mode %}
+                <form method="POST" class="edit-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="edit_profile" value="true">
+                    <div class="form-group">
+                        <label for="login">Логин:</label>
+                        <input type="text" id="login" name="login" value="{{ form.login.value|default_if_none:'' }}">
+                        {% if form.login.errors %}
+                            <div class="error-message">
+                                {% for error in form.login.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="user_name">Имя:</label>
+                        <input type="text" id="user_name" name="user_name" value="{{ form.user_name.value|default_if_none:'' }}">
+                        {% if form.user_name.errors %}
+                            <div class="error-message">
+                                {% for error in form.user_name.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="mail">Email:</label>
+                        <input type="email" id="mail" name="mail" value="{{ form.mail.value|default_if_none:'' }}">
+                        {% if form.mail.errors %}
+                            <div class="error-message">
+                                {% for error in form.mail.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-save">Сохранить</button>
+                    <a href="{% url 'profile' user.login %}" class="btn btn-cancel">Отмена</a>
+                </form>
+            {% elif change_password_mode %}
+                <form method="POST" class="password-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="change_password" value="true">
+                    <div class="form-group">
+                        <label for="old_password">Старый пароль:</label>
+                        <input type="password" id="old_password" name="old_password">
+                        {% if password_form.old_password.errors %}
+                            <div class="error-message">
+                                {% for error in password_form.old_password.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">Новый пароль:</label>
+                        <input type="password" id="new_password" name="new_password">
+                        {% if password_form.new_password.errors %}
+                            <div class="error-message">
+                                {% for error in password_form.new_password.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_new_password">Подтверждение нового пароля:</label>
+                        <input type="password" id="confirm_new_password" name="confirm_new_password">
+                        {% if password_form.confirm_new_password.errors %}
+                            <div class="error-message">
+                                {% for error in password_form.confirm_new_password.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if password_form.non_field_errors %}
+                        <div class="error-message">
+                            {% for error in password_form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-save">Сохранить</button>
+                    <a href="{% url 'profile' user.login %}" class="btn btn-cancel">Отмена</a>
+                </form>
+            {% else %}
+                <p><strong>Логин:</strong> {{ user.login }}</p>
+                <p><strong>Имя:</strong> {{ user.user_name }}</p>
+                <p><strong>Email:</strong> {{ user.mail }}</p>
+                <p><strong>Роль:</strong> {{ user.user_role }}</p>
+                {% if request.user.login == user.login %}
+                    <a href="{% url 'profile' user.login %}?edit=true" class="btn btn-edit">Редактировать</a>
+                    <a href="{% url 'profile' user.login %}?change_password=true" class="btn btn-change-password">Сменить пароль</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <a href="{% url 'book_list' %}" class="back-link">Вернуться к каталогу</a>
+    </div>
+</body>
+</html>

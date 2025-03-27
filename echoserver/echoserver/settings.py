@@ -110,6 +110,8 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = 'echo.User'
 
+LOGIN_URL = 'login'
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

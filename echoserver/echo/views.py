@@ -4,10 +4,12 @@ from django.core.paginator import Paginator
 from .models import Book
 from .models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import BookForm
-from .forms import UserForm
+from .forms import ChangeProfileForm
 from .forms import RegistrationForm
-from django.contrib.auth.hashers import make_password
+from .forms import ChangePasswordForm
 
 def book_list(request):
     books = Book.objects.all().order_by('title')
@@ -19,7 +21,7 @@ def book_list(request):
         'user': request.user
     })
 
-
+@login_required
 def book_create(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
@@ -30,7 +32,12 @@ def book_create(request):
         form = BookForm()
     return render(request, 'books/book_create.html', {'form': form})
 
+@login_required
 def book_update(request, pk):
+    if request.user.user_role == "user":
+        messages.error(request, "Доступ к обновлению книг запрещен")
+        return redirect('book_list')
+    
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         form = BookForm(request.POST, instance=book)
@@ -41,7 +48,12 @@ def book_update(request, pk):
         form = BookForm(instance=book)
     return render(request, 'books/book_update.html', {'form': form})
     
+@login_required
 def book_delete(request, pk):
+    if request.user.user_role == "user":
+        messages.error(request, "Доступ к удалению книг запрещен")
+        return redirect('book_list')
+    
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         book.delete()
@@ -78,4 +90,33 @@ def logn(request):
 def lgout(request):
     logout(request)
     return redirect('book_list')
+
+@login_required
+def profile(request, login):
+    user = get_object_or_404(User, login=login)
+
+    edit_mode = request.GET.get('edit')
+    change_password_mode = request.GET.get('change_password')
+    if request.method == 'POST' and edit_mode == 'true':
+        user_form = ChangeProfileForm(request.POST, instance=user)
+        if user_form.is_valid():
+            user_form.save()
+            messages.success("Профиль успешно обновлен")
+            return redirect('profile', login=request.user.login)
+    else:
+        user_form = ChangeProfileForm(instance=user)
+
+    if request.method == 'POST' and change_password_mode == 'true':
+        pass_form = ChangePasswordForm(user, request.POST)
+
+    if request.user.user_role != 'admin' and user.login != request.user.login:
+        messages.warning("Вы можете просматривать только свой профиль")
+        return redirect('profile', login=request.user.login)
+
+    return render(request, 'books/profile.html', {
+        'user': user,
+        'form': user_form,
+        'edit_mode': edit_mode,
+        'change_password_mode': change_password_mode
+    })
 

@@ -21,7 +21,7 @@ class Book(models.Model):
         return self.title
 
 class User(AbstractBaseUser, PermissionsMixin):
-    login = models.CharField(max_length=100, primary_key=True)
+    login = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=256)
     mail = models.CharField(max_length=100)
     user_name = models.CharField(max_length=100)
