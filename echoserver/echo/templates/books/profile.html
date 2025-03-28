@@ -46,6 +46,13 @@
         .auth-links .login-link:hover {
             background-color: #0056b3;
         }
+        .auth-links .cart-link {
+            background-color: #ff9500; 
+            color: #fff;
+        }
+        .auth-links .cart-link:hover {
+            background-color: #e08500; 
+        }
         .container {
             width: 80%;
             margin: 0 auto;
@@ -167,6 +174,7 @@
     <div class="header">
         <h1>Электронная библиотека</h1>
         <div class="auth-links">
+            <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
             <a href="{% url 'logout' %}" class="login-link">Выйти</a>
         </div>
     </div>

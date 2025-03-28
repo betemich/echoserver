@@ -1,6 +1,7 @@
 from django import forms
 from .models import Book
 from .models import User
+from django.contrib.auth.hashers import check_password
 
 class BookForm(forms.ModelForm):
     class Meta:
@@ -51,18 +52,26 @@ class ChangeProfileForm(forms.ModelForm):
             raise forms.ValidationError("Почта уже зарегистрирована")
         return mail
     
-class ChangePasswordForm(forms.ModelForm):
+class ChangePasswordForm(forms.Form):
     new_password = forms.CharField(widget=forms.PasswordInput())
-    confirm_password = forms.CharField(widget=forms.PasswordInput())
-    class Meta:
-        model = User
-        fields = ['password']
+    confirm_new_password = forms.CharField(widget=forms.PasswordInput())
+    old_password = forms.CharField(widget=forms.PasswordInput())
 
-    def clean():
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_old(self):
+        old_pass = self.cleaned_data('old_password')
+        if not check_password(old_pass, self.user.password):
+            raise forms.ValidationError("Неверный старый пароль")
+        return old_pass
+
+    def clean(self):
         cleaned_data = super().clean()
         new_password = cleaned_data.get('new_password')
-        confirm_password = cleaned_data.get('confirm_password')
-        if new_password and confirm_password and new_password != confirm_password:
+        confirm_new_password = cleaned_data.get('confirm_new_password')
+        if new_password and confirm_new_password and new_password != confirm_new_password:
             raise forms.ValidationError("Пароли не совпадают")
         return cleaned_data
     

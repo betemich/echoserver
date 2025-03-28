@@ -5,11 +5,14 @@ from .models import Book
 from .models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from .forms import BookForm
 from .forms import ChangeProfileForm
 from .forms import RegistrationForm
 from .forms import ChangePasswordForm
+from uuid import uuid4
+import json
 
 def book_list(request):
     books = Book.objects.all().order_by('title')
@@ -35,7 +38,7 @@ def book_create(request):
 @login_required
 def book_update(request, pk):
     if request.user.user_role == "user":
-        messages.error(request, "Доступ к обновлению книг запрещен")
+        messages.error(request, "Вы не можете обновлять книги")
         return redirect('book_list')
     
     book = get_object_or_404(Book, pk=pk)
@@ -51,7 +54,7 @@ def book_update(request, pk):
 @login_required
 def book_delete(request, pk):
     if request.user.user_role == "user":
-        messages.error(request, "Доступ к удалению книг запрещен")
+        messages.error(request, "Вы не можете удалять книги")
         return redirect('book_list')
     
     book = get_object_or_404(Book, pk=pk)
@@ -95,28 +98,113 @@ def lgout(request):
 def profile(request, login):
     user = get_object_or_404(User, login=login)
 
+    if request.user.user_role != 'admin' and user.login != request.user.login:
+        messages.warning(request, "Вы можете просматривать только свой профиль")
+        return redirect('profile', login=request.user.login)
+    
     edit_mode = request.GET.get('edit')
     change_password_mode = request.GET.get('change_password')
     if request.method == 'POST' and edit_mode == 'true':
         user_form = ChangeProfileForm(request.POST, instance=user)
         if user_form.is_valid():
             user_form.save()
-            messages.success("Профиль успешно обновлен")
+            messages.success(request, "Профиль успешно обновлен")
             return redirect('profile', login=request.user.login)
     else:
         user_form = ChangeProfileForm(instance=user)
 
     if request.method == 'POST' and change_password_mode == 'true':
         pass_form = ChangePasswordForm(user, request.POST)
-
-    if request.user.user_role != 'admin' and user.login != request.user.login:
-        messages.warning("Вы можете просматривать только свой профиль")
-        return redirect('profile', login=request.user.login)
+        if pass_form.is_valid():
+            user.set_password(pass_form.cleaned_data['new_password'])
+            user.save()
+            logout(request)
+            messages.success(request, "Пароль успешно изменен")
+            return redirect('login')
+    else:
+        pass_form = ChangePasswordForm(user)
 
     return render(request, 'books/profile.html', {
         'user': user,
         'form': user_form,
+        'password_form': pass_form,
         'edit_mode': edit_mode,
         'change_password_mode': change_password_mode
     })
 
+@login_required
+def add_to_cart(request, pk):
+    book = Book.objects.get(pk=pk)
+    cart_cookie = request.COOKIES.get('cart', '{}')
+    try:
+        cart = json.loads(cart_cookie)
+    except json.JSONDecodeError:
+        cart = {}
+    
+    book_id_str = str(pk)
+    if book_id_str in cart:
+        cart[book_id_str] += 1
+    else:
+        cart[book_id_str] = 1
+
+    response = redirect('book_list')
+    response.set_cookie(
+        'cart',
+        json.dumps(cart),
+        max_age=31536000
+    )
+
+    messages.success(request, f"Книга \"{book.title}\" успешно добавлена в корзину")
+    return response
+
+@login_required
+def cart(request):
+    cart_cookie = request.COOKIES.get('cart', '{}')
+    try:
+        cart = json.loads(cart_cookie)
+    except json.JSONDecodeError:
+        cart = {}
+
+    cart_items = []
+    overall_price = 0
+    for book_id, quantity in cart.items():
+        try:
+            book = Book.objects.get(pk=book_id)
+            cart_items.append({
+                'book': book,
+                'quantity': quantity
+            })
+            overall_price += quantity * book.cost
+        except Book.DoesNotExist:
+            continue
+
+    return render(request, 'books/cart.html', {
+        'cart_items': cart_items,
+        'overall_price': overall_price
+    })
+
+@login_required
+def remove_from_cart(request, pk):
+    book = Book.objects.get(pk=pk)
+    cart_cookie = request.COOKIES.get('cart', '{}')
+    try:
+        cart = json.loads(cart_cookie)
+    except json.JSONDecodeError:
+        cart = {}
+
+    str_pk = str(pk)
+    if str_pk in cart and cart[str_pk] > 1:
+        cart[str_pk] -= 1
+    elif str_pk in cart:
+        del cart[str_pk]
+
+    responce = redirect('cart')
+    responce.set_cookie(
+        'cart',
+        json.dumps(cart),
+        max_age=31536000
+    )
+
+    messages.success(request, f"Книга \"{book.title}\" успешно удалена из корзины")
+    return responce
+    

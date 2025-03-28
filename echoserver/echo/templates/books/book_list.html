@@ -62,6 +62,13 @@
         .auth-links .profile-link:hover {
             background-color: #138496;
         }
+        .auth-links .cart-link {
+            background-color: #ff9500; 
+            color: #fff;
+        }
+        .auth-links .cart-link:hover {
+            background-color: #e08500; 
+        }
         .container {
             width: 80%;
             margin: 0 auto;
@@ -123,6 +130,16 @@
         .book-actions .delete-link:hover {
             background-color: #c82333;
         }
+        .auth-links .profile-link,
+        .book-actions .add-to-cart-link {
+            background-color: #17a2b8; 
+            color: #fff;
+        }
+
+        .auth-links .profile-link:hover,
+        .book-actions .add-to-cart-link:hover {
+            background-color: #138496;
+        }
         .pagination {
             text-align: center;
             margin-top: 20px;
@@ -173,6 +190,7 @@
         <h1>Электронная библиотека</h1>
         <div class="auth-links">
             {% if user.is_authenticated %}
+                <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
                 <a href="{% url 'profile' user.login %}" class="profile-link">Профиль</a>
                 <a href="{% url 'logout' %}" class="login-link">Выйти</a>
             {% else %}
@@ -202,12 +220,15 @@
                     <div class="book-info">
                         {{ book.title }} ({{ book.author }}, {{ book.cost }} {{ book.cost|ruble }})
                     </div>
-                    {% if user.is_authenticated and user.user_role == "admin" %}
-                        <div class="book-actions">
+                    <div class="book-actions">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'add_to_cart' book.pk %}" class="add-to-cart-link">Положить в корзину</a>
+                        {% endif %}
+                        {% if user.is_authenticated and user.user_role == "admin" %}
                             <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>
                             <a href="{% url 'book_delete' book.pk %}" class="delete-link">Удалить</a>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </li>
             {% endfor %}
         </ul>

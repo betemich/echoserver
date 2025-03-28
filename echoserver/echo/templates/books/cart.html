@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            width: 80%;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .auth-links .login-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .auth-links .login-link:hover {
+            background-color: #0056b3;
+        }
+        .auth-links .cart-link {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        .auth-links .cart-link:hover {
+            background-color: #138496;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .cart-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .cart-list li {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-list li:hover {
+            background-color: #f1f1f1;
+        }
+        .cart-item-actions a {
+            color: #dc3545;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .cart-item-actions a:hover {
+            background-color: #f8d7da;
+        }
+        .overall-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .back-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .empty-cart-message {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Электронная библиотека</h1>
+        <div class="auth-links">
+            <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
+            <a href="{% url 'logout' %}" class="login-link">Выйти</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Корзина</h1>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if cart_items %}
+            <ul class="cart-list">
+                {% for item in cart_items %}
+                    <li>
+                        <div class="cart-item-info">
+                            {{ item.book.title }} ({{ item.book.author }}) - {{ item.book.cost }} руб. (Количество: {{ item.quantity }})
+                        </div>
+                        <div class="cart-item-actions">
+                            <a href="{% url 'remove_from_cart' item.book.id %}">Удалить</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="overall-price">
+                Общая стоимость: {{ overall_price }} руб.
+            </div>
+        {% else %}
+            <p class="empty-cart-message">Ваша корзина пуста.</p>
+        {% endif %}
+        <a href="{% url 'book_list' %}" class="back-link">Вернуться к каталогу</a>
+    </div>
+</body>
+</html>

@@ -10,5 +10,8 @@ urlpatterns = [
     path('register/', views.registration, name='registration'),
     path('login/', views.logn, name='login'),
     path('logout/', views.lgout, name='logout'),
-    path('profile/<str:login>/', views.profile, name='profile')
+    path('profile/<str:login>/', views.profile, name='profile'),
+    path('add_to_cart/<int:pk>', views.add_to_cart, name='add_to_cart'),
+    path('cart', views.cart, name='cart'),
+    path('remove_from_cart/<int:pk>', views.remove_from_cart, name='remove_from_cart')
 ]

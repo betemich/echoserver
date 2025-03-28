@@ -112,6 +112,8 @@ AUTH_USER_MODEL = 'echo.User'
 
 LOGIN_URL = 'login'
 
+SESSION_COOKIE_AGE = 31536000
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
