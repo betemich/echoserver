@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали заказа #{{ order.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            width: 80%;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .auth-links .cart-link {
+            background-color: #ff9500;
+            color: #fff;
+        }
+        .auth-links .cart-link:hover {
+            background-color: #e08500;
+        }
+        .auth-links .orders-link {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+        .auth-links .orders-link:hover {
+            background-color: #5a32a3;
+        }
+        .auth-links .profile-link {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        .auth-links .profile-link:hover {
+            background-color: #138496;
+        }
+        .auth-links .login-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .auth-links .login-link:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .order-details {
+            margin-bottom: 20px;
+        }
+        .order-items {
+            list-style-type: none;
+            padding: 0;
+        }
+        .order-items li {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .order-items li:hover {
+            background-color: #f1f1f1;
+        }
+        .back-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Электронная библиотека</h1>
+        <div class="auth-links">
+            <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
+            <a href="{% url 'orders' %}" class="orders-link">Заказы</a>
+            <a href="{% url 'profile' user.login %}" class="profile-link">Профиль</a>
+            <a href="{% url 'logout' %}" class="login-link">Выйти</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Детали заказа #{{ order.id }}</h1>
+        <div class="order-details">
+            <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Общая стоимость:</strong> {{ order.total_price }} руб.</p>
+        </div>
+        <h2>Товары в заказе</h2>
+        <ul class="order-items">
+            {% for item in books %}
+                <li>
+                    {{ item.book.title }} ({{ item.book.author }}) - {{ item.book.cost }} руб. (Количество: {{ item.quantity }})
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'orders' %}" class="back-link">Вернуться к списку заказов</a>
+    </div>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Корзина</title>
+    <title>Мои заказы</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,19 +39,33 @@
             font-size: 14px;
             transition: background-color 0.3s ease;
         }
+        .auth-links .cart-link {
+            background-color: #ff9500;
+            color: #fff;
+        }
+        .auth-links .cart-link:hover {
+            background-color: #e08500;
+        }
+        .auth-links .orders-link {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+        .auth-links .orders-link:hover {
+            background-color: #5a32a3;
+        }
+        .auth-links .profile-link {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        .auth-links .profile-link:hover {
+            background-color: #138496;
+        }
         .auth-links .login-link {
             background-color: #007bff;
             color: #fff;
         }
         .auth-links .login-link:hover {
             background-color: #0056b3;
-        }
-        .auth-links .cart-link {
-            background-color: #ff9500; /* Оранжевый */
-            color: #fff;
-        }
-        .auth-links .cart-link:hover {
-            background-color: #e08500; /* Тёмный оранжевый */
         }
         .container {
             width: 80%;
@@ -66,11 +80,11 @@
             text-align: center;
             color: #333;
         }
-        .cart-list {
+        .order-list {
             list-style-type: none;
             padding: 0;
         }
-        .cart-list li {
+        .order-list li {
             background-color: #f9f9f9;
             margin-bottom: 10px;
             padding: 15px;
@@ -80,26 +94,19 @@
             justify-content: space-between;
             align-items: center;
         }
-        .cart-list li:hover {
+        .order-list li:hover {
             background-color: #f1f1f1;
         }
-        .cart-item-actions a {
-            color: #dc3545;
+        .order-actions a {
+            color: #007bff;
             text-decoration: none;
             padding: 5px 10px;
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        .cart-item-actions a:hover {
-            background-color: #f8d7da;
+        .order-actions a:hover {
+            background-color: #e7f1ff;
             transform: scale(1.05);
-        }
-        .overall-price {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 20px;
-            text-align: right;
         }
         .back-link {
             display: inline-block;
@@ -112,20 +119,6 @@
         }
         .back-link:hover {
             background-color: #0056b3;
-        }
-        .checkout-link {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #28a745; /* Зелёный */
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            margin-left: 10px;
-            transition: background-color 0.3s ease;
-        }
-        .checkout-link:hover {
-            background-color: #218838; /* Тёмный зелёный */
         }
         .messages {
             margin-bottom: 20px;
@@ -142,7 +135,7 @@
             background-color: #fff3cd;
             color: #856404;
         }
-        .empty-cart-message {
+        .empty-message {
             font-size: 18px;
             color: #666;
             text-align: center;
@@ -159,11 +152,14 @@
         <h1>Электронная библиотека</h1>
         <div class="auth-links">
             <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
+            <a href="{% url 'orders' %}" class="orders-link">Заказы</a>
+            <a href="{% url 'profile' user.login %}" class="profile-link">Профиль</a>
             <a href="{% url 'logout' %}" class="login-link">Выйти</a>
         </div>
     </div>
     <div class="container">
-        <h1>Корзина</h1>
+        <h1>Мои заказы</h1>
+
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -171,26 +167,26 @@
                 {% endfor %}
             </div>
         {% endif %}
-        {% if cart_items %}
-            <ul class="cart-list">
-                {% for item in cart_items %}
+
+        {% if orders %}
+            <ul class="order-list">
+                {% for order in orders %}
                     <li>
-                        <div class="cart-item-info">
-                            {{ item.book.title }} ({{ item.book.author }}) - {{ item.book.cost }} руб. (Количество: {{ item.quantity }})
+                        <div class="order-info">
+                            Заказ #{{ order.id }} от {{ order.created_at|date:"d.m.Y H:i" }} 
+                            <br>
+                            Общая стоимость: {{ order.total_price }} руб.
                         </div>
-                        <div class="cart-item-actions">
-                            <a href="{% url 'remove_from_cart' item.book.id %}">Удалить</a>
+                        <div class="order-actions">
+                            <a href="{% url 'order_detail' order.id %}">Подробнее</a>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
-            <div class="overall-price">
-                Общая стоимость: {{ overall_price }} руб.
-            </div>
-            <a href="{% url 'checkout' %}" class="checkout-link">Оформить заказ</a>
         {% else %}
-            <p class="empty-cart-message">Ваша корзина пуста.</p>
+            <p class="empty-message">У вас пока нет заказов.</p>
         {% endif %}
+
         <a href="{% url 'book_list' %}" class="back-link">Вернуться к каталогу</a>
     </div>
 </body>

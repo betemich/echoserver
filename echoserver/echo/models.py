@@ -40,3 +40,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.login
+    
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_order')
+
+    class Meta:
+        managed = False
+        db_table = 'orders'
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='item_book')
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'order_item'

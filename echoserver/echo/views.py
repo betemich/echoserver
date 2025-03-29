@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .models import Book
 from .models import User
+from .models import Order
+from .models import OrderItem
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
@@ -11,7 +13,6 @@ from .forms import BookForm
 from .forms import ChangeProfileForm
 from .forms import RegistrationForm
 from .forms import ChangePasswordForm
-from uuid import uuid4
 import json
 
 def book_list(request):
@@ -135,7 +136,7 @@ def profile(request, login):
 @login_required
 def add_to_cart(request, pk):
     book = Book.objects.get(pk=pk)
-    cart_cookie = request.COOKIES.get('cart', '{}')
+    cart_cookie = request.COOKIES.get(f'cart_{request.user.id}', '{}')
     try:
         cart = json.loads(cart_cookie)
     except json.JSONDecodeError:
@@ -149,7 +150,7 @@ def add_to_cart(request, pk):
 
     response = redirect('book_list')
     response.set_cookie(
-        'cart',
+        f'cart_{request.user.id}',
         json.dumps(cart),
         max_age=31536000
     )
@@ -159,7 +160,7 @@ def add_to_cart(request, pk):
 
 @login_required
 def cart(request):
-    cart_cookie = request.COOKIES.get('cart', '{}')
+    cart_cookie = request.COOKIES.get(f'cart_{request.user.id}', '{}')
     try:
         cart = json.loads(cart_cookie)
     except json.JSONDecodeError:
@@ -186,7 +187,7 @@ def cart(request):
 @login_required
 def remove_from_cart(request, pk):
     book = Book.objects.get(pk=pk)
-    cart_cookie = request.COOKIES.get('cart', '{}')
+    cart_cookie = request.COOKIES.get(f'cart_{request.user.id}', '{}')
     try:
         cart = json.loads(cart_cookie)
     except json.JSONDecodeError:
@@ -200,7 +201,7 @@ def remove_from_cart(request, pk):
 
     responce = redirect('cart')
     responce.set_cookie(
-        'cart',
+        f'cart_{request.user.id}',
         json.dumps(cart),
         max_age=31536000
     )
@@ -208,3 +209,55 @@ def remove_from_cart(request, pk):
     messages.success(request, f"Книга \"{book.title}\" успешно удалена из корзины")
     return responce
     
+@login_required
+def checkout(request):
+    cart_cookie = request.COOKIES.get(f'cart_{request.user.id}')
+    try:
+        cart = json.loads(cart_cookie)
+    except json.JSONDecodeError:
+        cart = {}
+    
+    if not cart:
+        messages.warning(request, "Корзина пуста")
+        return redirect('cart')
+    
+    order = Order.objects.create(user_id=request.user.id)
+    total_price = 0
+
+    for bookID, quantity in cart.items():
+        try:
+            book = Book.objects.get(pk=bookID)
+            OrderItem.objects.create(
+                book_id=bookID,
+                order_id=order.id,
+                quantity=quantity
+            )
+            total_price += book.cost * quantity
+        except Book.DoesNotExist:
+            continue
+
+    order.total_price = total_price
+    order.save()
+
+    responce = redirect('cart')
+    responce.delete_cookie(f'cart_{request.user.id}')
+
+    messages.success(request, "Заказ успешно оформлен")
+    return responce
+
+@login_required
+def orders(request):
+    orders = Order.objects.filter(user_id=request.user.id)
+    return render(request, 'books/order_list.html', {
+        'orders': orders
+    })
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(Order, id=pk, user_id=request.user.id)
+    order_books = OrderItem.objects.filter(order_id=pk)
+    return render(request, 'books/order_detail.html', {
+        'order': order,
+        'books': order_books
+    })
+

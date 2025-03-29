@@ -69,6 +69,13 @@
         .auth-links .cart-link:hover {
             background-color: #e08500; 
         }
+        .auth-links .orders-link {
+            background-color: #6f42c1; /* Фиолетовый цвет для кнопки "Заказы" */
+            color: #fff;
+        }
+        .auth-links .orders-link:hover {
+            background-color: #5a32a3; /* Тёмный фиолетовый при наведении */
+        }
         .container {
             width: 80%;
             margin: 0 auto;
@@ -135,7 +142,6 @@
             background-color: #17a2b8; 
             color: #fff;
         }
-
         .auth-links .profile-link:hover,
         .book-actions .add-to-cart-link:hover {
             background-color: #138496;
@@ -191,6 +197,7 @@
         <div class="auth-links">
             {% if user.is_authenticated %}
                 <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
+                <a href="{% url 'orders' %}" class="orders-link">Заказы</a> <!-- Новая кнопка "Заказы" -->
                 <a href="{% url 'profile' user.login %}" class="profile-link">Профиль</a>
                 <a href="{% url 'logout' %}" class="login-link">Выйти</a>
             {% else %}
