@@ -189,6 +189,28 @@
             background-color: #fff3cd;
             color: #856404;
         }
+        .filter-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .filter-section label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .filter-section select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .book-list.loading::before {
+            content: "Загрузка...";
+            display: block;
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -197,7 +219,7 @@
         <div class="auth-links">
             {% if user.is_authenticated %}
                 <a href="{% url 'cart' %}" class="cart-link">Корзина</a>
-                <a href="{% url 'orders' %}" class="orders-link">Заказы</a> <!-- Новая кнопка "Заказы" -->
+                <a href="{% url 'orders' %}" class="orders-link">Заказы</a>
                 <a href="{% url 'profile' user.login %}" class="profile-link">Профиль</a>
                 <a href="{% url 'logout' %}" class="login-link">Выйти</a>
             {% else %}
@@ -221,7 +243,26 @@
             <a href="{% url 'book_create' %}" class="add-book-link">Добавить новую книгу</a>
         {% endif %}
 
-        <ul class="book-list">
+        <div class="filter-section">
+            <div>
+                <label for="sort-title">Сортировка по названию:</label>
+                <select id="sort-title">
+                    <option value="">Без сортировки</option>
+                    <option value="ASC">А-Я</option>
+                    <option value="DESC">Я-А</option>
+                </select>
+            </div>
+            <div>
+                <label for="sort-cost">Сортировка по стоимости:</label>
+                <select id="sort-cost">
+                    <option value="">Без сортировки</option>
+                    <option value="ASC">По возрастанию</option>
+                    <option value="DESC">По убыванию</option>
+                </select>
+            </div>
+        </div>
+
+        <ul class="book-list" id="book-list">
             {% for book in page_obj %}
                 <li>
                     <div class="book-info">
@@ -240,17 +281,15 @@
             {% endfor %}
         </ul>
 
-        <div class="pagination">
+        <div class="pagination" id="pagination">
             <span class="step-links">
                 {% if page_obj.has_previous %}
                     <a href="?page=1">« первая</a>
                     <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
                 {% endif %}
-
                 <span class="current">
                     Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
                 </span>
-
                 {% if page_obj.has_next %}
                     <a href="?page={{ page_obj.next_page_number }}">следующая</a>
                     <a href="?page={{ page_obj.paginator.num_pages }}">последняя »</a>
@@ -258,5 +297,11 @@
             </span>
         </div>
     </div>
+
+    <script>
+        const bookListUrl = "{% url 'book_list' %}";
+    </script>
+    {% load static %}
+    <script src="{% static 'js/book_list.js' %}"></script>
 </body>
 </html>

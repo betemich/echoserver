@@ -7,19 +7,87 @@ from .models import Order
 from .models import OrderItem
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from .forms import BookForm
 from .forms import ChangeProfileForm
 from .forms import RegistrationForm
 from .forms import ChangePasswordForm
+from django.http import JsonResponse
 import json
+import re
+from django.template.loader import render_to_string
+from abc import ABC, abstractmethod
+
+class BookFilter(ABC):
+    @abstractmethod
+    def add_filter(self):
+        pass
+
+class CostFilterASC(BookFilter):
+    def add_filter(self, queryset):
+        queryset.append('cost')
+        return queryset
+    
+class CostFilterDESC(BookFilter):
+    def add_filter(self, queryset):
+        queryset.append('-cost')
+        return queryset
+    
+class TitleFilterASC(BookFilter):
+    def add_filter(self, queryset):
+        queryset.append('title')
+        return queryset
+    
+class TitleFilterDESC(BookFilter):
+    def add_filter(self, queryset):
+        queryset.append('-title')
+        return queryset
+    
+FILTERS = {
+    'costASC': CostFilterASC(),
+    'costDESC': CostFilterDESC(),
+    'titleASC': TitleFilterASC(),
+    'titleDESC': TitleFilterDESC()
+}
+
+def get_filter(request):
+    sort_cost = request.GET.get('sort_cost')
+    sort_title = request.GET.get('sort_title')
+    books = Book.objects.all()
+    queryset = []
+    if sort_title:
+        filter_key = f'title{sort_title}'
+        queryset = FILTERS.get(filter_key).add_filter(queryset)
+    if sort_cost:
+        filter_key = f'cost{sort_cost}'
+        queryset = FILTERS.get(filter_key).add_filter(queryset)
+    
+    if not sort_title and not sort_cost:
+        queryset.append('title')
+    
+    books = books.order_by(*queryset)
+    return books
 
 def book_list(request):
-    books = Book.objects.all().order_by('title')
+    books = get_filter(request)
     paginator = Paginator(books, 10)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        books_html = render_to_string('books/book_list_partial.html', {
+            'page_obj': page_obj,
+            'user': request.user
+        }, request=request)
+        pagination_html = render_to_string('books/pagination_partial.html', {
+            'page_obj': page_obj
+        }, request=request)
+
+        return JsonResponse({
+            'books_html': books_html,
+            'pagination_html': pagination_html
+        })
+
     return render(request, 'books/book_list.html', {
         'page_obj': page_obj,
         'user': request.user
@@ -106,13 +174,13 @@ def profile(request, login):
     edit_mode = request.GET.get('edit')
     change_password_mode = request.GET.get('change_password')
     if request.method == 'POST' and edit_mode == 'true':
-        user_form = ChangeProfileForm(request.POST, instance=user)
+        user_form = ChangeProfileForm(user, request.POST, instance=user)
         if user_form.is_valid():
             user_form.save()
             messages.success(request, "Профиль успешно обновлен")
-            return redirect('profile', login=request.user.login)
+            return redirect('profile', login=user_form.cleaned_data['login'])
     else:
-        user_form = ChangeProfileForm(instance=user)
+        user_form = ChangeProfileForm(user, instance=user)
 
     if request.method == 'POST' and change_password_mode == 'true':
         pass_form = ChangePasswordForm(user, request.POST)
@@ -199,15 +267,15 @@ def remove_from_cart(request, pk):
     elif str_pk in cart:
         del cart[str_pk]
 
-    responce = redirect('cart')
-    responce.set_cookie(
+    response = redirect('cart')
+    response.set_cookie(
         f'cart_{request.user.id}',
         json.dumps(cart),
         max_age=31536000
     )
 
     messages.success(request, f"Книга \"{book.title}\" успешно удалена из корзины")
-    return responce
+    return response
     
 @login_required
 def checkout(request):
@@ -239,11 +307,11 @@ def checkout(request):
     order.total_price = total_price
     order.save()
 
-    responce = redirect('cart')
-    responce.delete_cookie(f'cart_{request.user.id}')
+    response = redirect('cart')
+    response.delete_cookie(f'cart_{request.user.id}')
 
     messages.success(request, "Заказ успешно оформлен")
-    return responce
+    return response
 
 @login_required
 def orders(request):
@@ -260,4 +328,59 @@ def order_detail(request, pk):
         'order': order,
         'books': order_books
     })
+
+class ValidateField(ABC):
+    @abstractmethod
+    def validate(self, value):
+        pass
+
+class LoginValidator(ValidateField):
+    def validate(self, value):
+        if User.objects.filter(login=value).exists():
+            return {'error': 'Этот логин уже занят'}
+        return {}
+    
+class MailValidator(ValidateField):
+    def validate(self, value):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(pattern, value):
+            return {'error': 'Некорректный email. Пример: user@domain.com'}
+        
+        if User.objects.filter(mail=value).exists():
+            return {'error': 'Эта почта уже зарегистрирована'}
+        return {}
+    
+class PasswordValidator(ValidateField):
+    def validate(self, value):
+        if len(value) < 6:
+            return {'error': "Пароль должен быть не менее 6 символов"}
+        return {}
+
+VALIDATORS = {
+    'login': LoginValidator(),
+    'mail': MailValidator(),
+    'password': PasswordValidator()
+}
+    
+def validate_field(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Неверный запрос'}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        field = data.get('field')
+        value = data.get('value')
+
+        validator = VALIDATORS.get(field)
+        if not validator:
+            return JsonResponse({'error': 'Неизвестное поле'}, status=400)
+        
+        result = validator.validate(value)
+        return JsonResponse(result)
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+
+    
+        
 

@@ -1,0 +1,19 @@
+{% load custom_filters %}
+<ul class="book-list" id="book-list">
+    {% for book in page_obj %}
+        <li>
+            <div class="book-info">
+                {{ book.title }} ({{ book.author }}, {{ book.cost }} {{ book.cost|ruble }})
+            </div>
+            <div class="book-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'add_to_cart' book.pk %}" class="add-to-cart-link">Положить в корзину</a>
+                {% endif %}
+                {% if user.is_authenticated and user.user_role == "admin" %}
+                    <a href="{% url 'book_update' book.pk %}" class="edit-link">Изменить</a>
+                    <a href="{% url 'book_delete' book.pk %}" class="delete-link">Удалить</a>
+                {% endif %}
+            </div>
+        </li>
+    {% endfor %}
+</ul>

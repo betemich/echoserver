@@ -46,9 +46,13 @@ class ChangeProfileForm(forms.ModelForm):
         model = User
         fields = ['login', 'mail', 'user_name']
 
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     def clean_mail(self):
         mail = self.cleaned_data['mail']
-        if User.objects.filter(mail=mail).exists():
+        if User.objects.filter(mail=mail).exists() and mail != self.user.mail:
             raise forms.ValidationError("Почта уже зарегистрирована")
         return mail
     
